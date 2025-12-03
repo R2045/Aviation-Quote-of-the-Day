@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aviation Quote of the Day</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #0f172a;
+        }
+        .quote-font {
+            font-family: 'Playfair Display', serif;
+        }
+        .text-shadow {
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+        }
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 3px solid #38bdf8;
+            width: 24px;
+            height: 24px;
+            -webkit-animation: spin 1s linear infinite;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .fade-transition {
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="h-screen overflow-hidden relative selection:bg-sky-500 selection:text-white">
+
+    <!-- Background Layer -->
+    <div class="absolute inset-0 w-full h-full z-0">
+        <!-- Default placeholder while JS loads -->
+        <img id="bg-image" 
+             src="https://images.unsplash.com/photo-1474302770737-173ee21bab63?auto=format&fit=crop&w=1920&q=80" 
+             class="w-full h-full object-cover opacity-100 fade-transition"
+             alt="Aviation Background">
+        <!-- Dark Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/60 via-black/20 to-black/70"></div>
+    </div>
+
+    <!-- Main Interface -->
+    <div class="relative z-10 h-full flex flex-col justify-center items-center px-8 sm:px-12 lg:px-20">
+        
+        <!-- Top Bar -->
+        <div class="absolute top-0 left-0 w-full p-6 flex justify-between items-center">
+            <div class="flex items-center space-x-3 text-white/90">
+                <div class="bg-sky-500/20 p-2 rounded-lg border border-sky-500/30">
+                    <i class="fa-solid fa-plane-up text-sky-400 text-lg"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xs tracking-[0.2em] uppercase font-bold text-sky-400">AeroDaily</span>
+                    <span class="text-[10px] text-white/50 tracking-wider">Inspiration from Above</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button onclick="copyQuote()" class="group flex items-center space-x-2 bg-white/5 hover:bg-white/10 transition-all rounded-full px-4 py-2 border border-white/10 text-xs">
+                    <i class="fa-regular fa-copy text-sky-400 group-hover:text-white transition-colors"></i>
+                    <span class="text-white/70 group-hover:text-white transition-colors">Copy</span>
+                </button>
+                <div id="date-display" class="text-xs font-medium tracking-wide text-white/60 hidden sm:block bg-black/30 px-3 py-1 rounded-full border border-white/5">
+                    <!-- Date inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Arrows -->
+        <button id="btn-prev" onclick="changeDay(-1)" class="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 text-white/20 hover:text-white hover:scale-110 transition-all p-4 rounded-full hover:bg-white/5 group" title="Previous Day">
+            <i class="fa-solid fa-chevron-left text-3xl sm:text-4xl filter drop-shadow-md group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"></i>
+        </button>
+
+        <button id="btn-next" onclick="changeDay(1)" class="absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 text-white/20 hover:text-white hover:scale-110 transition-all p-4 rounded-full hover:bg-white/5 group disabled:opacity-0 disabled:cursor-default" title="Next Day">
+            <div id="next-icon-container">
+                <i class="fa-solid fa-chevron-right text-3xl sm:text-4xl filter drop-shadow-md group-hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]"></i>
+            </div>
+            <div id="next-loader" class="hidden absolute inset-0 flex items-center justify-center">
+                <div class="loader"></div>
+            </div>
+        </button>
+
+        <!-- Quote Content -->
+        <div class="max-w-5xl w-full text-center z-10">
+            <div class="mb-10 opacity-80">
+                <i class="fa-solid fa-quote-left text-5xl text-sky-500 drop-shadow-[0_0_15px_rgba(14,165,233,0.4)]"></i>
+            </div>
+            
+            <div class="min-h-[220px] flex flex-col justify-center">
+                <h1 id="quote-text" class="quote-font text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-8 text-white italic tracking-wide text-shadow fade-transition">
+                    Loading...
+                </h1>
+            </div>
+
+            <div class="flex flex-col items-center justify-center space-y-3 mt-4 fade-transition" id="quote-meta">
+                <div class="h-0.5 w-16 bg-gradient-to-r from-transparent via-sky-500 to-transparent mb-4"></div>
+                <p id="quote-author" class="text-lg md:text-2xl font-bold tracking-widest text-white uppercase text-shadow">
+                    <!-- Author -->
+                </p>
+                <p id="quote-role" class="text-xs sm:text-xs font-semibold tracking-[0.2em] text-sky-300 uppercase text-shadow bg-black/40 px-3 py-1 rounded border border-white/10">
+                    <!-- Role -->
+                </p>
+            </div>
+        </div>
+
+        <!-- Notification Toast -->
+        <div id="toast" class="absolute bottom-10 bg-sky-600 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-3">
+            <i class="fa-solid fa-check-circle"></i>
+            <span class="text-sm font-medium">Quote copied to clipboard</span>
+        </div>
+
+    </div>
+
+    <script>
+        // --- CONFIGURATION ---
+        const YEAR_SEED_OFFSET_QUOTES = 0;
+        const YEAR_SEED_OFFSET_IMAGES = 9999;
+        
+        // --- DATA SOURCES ---
+        
+        // HAND-PICKED IMAGES (Tier 1)
+        // Used first because they load fastest and are perfectly curated.
+        const curatedBackgrounds = [
+            "https://images.unsplash.com/photo-1474302770737-173ee21bab63?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1556388169-db19adc960fd?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1542296332-2e44a99cfef9?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1506459955437-0f8b19d45a96?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1520633857640-3a525f750b32?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1529074963764-98f45c47344b?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1558992303-529749f80540?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1517056463371-3cb721a97d1e?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1559627748-831883605c36?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1583070161414-7389c20518fa?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1540962351504-03099e0a754b?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1559067515-bf7d799b6d4d?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1505535162959-9bbcb4fe3bbc?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1520182175936-a3652611a432?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1570710891163-6d3b5c47248b?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1524592714635-d77511072bbd?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1483304528321-0674f0040030?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1580661869185-3343a1378f40?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1582236894054-935105829623?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1517429128955-673d6e8e797d?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1587317769850-252723049533?auto=format&fit=crop&w=1920&q=80",
+            "https://images.unsplash.com/photo-1588656114476-ae0a8115682c?auto=format&fit=crop&w=1920&q=80"
+        ];
+
+        // MASSIVE QUOTE LIST
+        const quotes = [
+            { text: "Oh! I have slipped the surly bonds of Earth and danced the skies on laughter-silvered wings.", author: "John Gillespie Magee, Jr.", role: "WWII Pilot & Poet" },
+            { text: "The engine is the heart of an airplane, but the pilot is its soul.", author: "Walter Raleigh", role: "Historian & Writer" },
+            { text: "Aviation is proof that given the will, we have the capacity to achieve the impossible.", author: "Eddie Rickenbacker", role: "WWI Ace" },
+            { text: "The air is the only place free from prejudices.", author: "Bessie Coleman", role: "First African American Female Pilot" },
+            { text: "There is no sport equal to that which aviators enjoy while being carried through the air on great white wings.", author: "Wilbur Wright", role: "Co-Inventor of the Airplane" },
+            { text: "When everything seems to be going against you, remember that the airplane takes off against the wind, not with it.", author: "Henry Ford", role: "Aviation Pioneer" },
+            { text: "The most effective way to do it, is to do it.", author: "Amelia Earhart", role: "Aviation Pioneer" },
+            { text: "Flying might not be all plain sailing, but the fun of it is worth the price.", author: "Amelia Earhart", role: "Aviation Pioneer" },
+            { text: "If you can walk away from a landing, it's a good landing. If you use the airplane the next day, it's an outstanding landing.", author: "Chuck Yeager", role: "First Pilot to Break Sound Barrier" },
+            { text: "It is possible to fly without motors, but not without knowledge and skill.", author: "Wilbur Wright", role: "Co-Inventor of the Airplane" },
+            { text: "More than anything else the sensation is one of perfect peace mingled with an excitement that strains every nerve to the utmost.", author: "Wilbur Wright", role: "Co-Inventor of the Airplane" },
+            { text: "The desire to fly is an idea handed down to us by our ancestors who... looked enviously on the birds soaring freely through.", author: "Orville Wright", role: "Co-Inventor of the Airplane" },
+            { text: "To most people, the sky is the limit. To those who love aviation, the sky is home.", author: "Jerry Crawford", role: "Author" },
+            { text: "Landing a plane is like riding a bicycle. It’s just a lot harder to put baseball cards in the spokes.", author: "Captain Rex Kramer", role: "Airplane! (Fictional Pilot)" },
+            { text: "Aeronautics was neither an industry nor a science. It was a miracle.", author: "Igor Sikorsky", role: "Inventor of the Helicopter" },
+            { text: "I fly because it releases my mind from the tyranny of petty things.", author: "Antoine de Saint-Exupéry", role: "Pilot & Author" },
+            { text: "The exhilaration of flying is too keen, the pleasure too great, for it to be neglected as a sport.", author: "Orville Wright", role: "Co-Inventor of the Airplane" },
+            { text: "Sometimes, flying feels too godlike to be attained by man. Sometimes, the world from above seems too beautiful...", author: "Charles A. Lindbergh", role: "First Solo Transatlantic Flight" },
+            { text: "Good judgment comes from experience. Unfortunately, the experience usually comes from bad judgment.", author: "Unknown Aviator", role: "Hangar Wisdom" },
+            { text: "Take off is optional. Landing is mandatory.", author: "Unknown", role: "Basic Physics" },
+            { text: "Pilots take no special joy in walking. Pilots like flying.", author: "Neil Armstrong", role: "First Man on the Moon" },
+            { text: "You haven't seen a tree until you've seen its shadow from the sky.", author: "Amelia Earhart", role: "Aviation Pioneer" },
+            { text: "Gliders, sailplanes, they're wonderful flying machines. It's the closest you can come to being a bird.", author: "Neil Armstrong", role: "First Man on the Moon" },
+            { text: "If you're faced with a forced landing, fly the thing as far into the crash as possible.", author: "Bob Hoover", role: "Fighter Pilot Legend" },
+            { text: "Adventure is worthwhile in itself.", author: "Amelia Earhart", role: "Aviation Pioneer" },
+            { text: "I think it is a pity to lose the romantic side of flying and simply to accept it as a common means of transport.", author: "Amy Johnson", role: "Pioneering Pilot" },
+            { text: "Never quit. Never give up. Fly it to the end.", author: "Chuck Aaron", role: "Helicopter Pilot" },
+            { text: "The Cub is the safest airplane in the world; it can just barely kill you.", author: "Max Stanley", role: "Test Pilot" },
+            { text: "Flying is more than a sport and more than a job; flying is pure passion and desire, which fill your lifetime.", author: "Adolf Galland", role: "Ace Pilot" },
+            { text: "Prepare for the unknown, unexpected and likely impossible.", author: "Ed Yost", role: "Balloonist" },
+            { text: "There is no excuse for an airplane to run out of fuel.", author: "Aviation Proverb", role: "Safety Rule #1" },
+            { text: "The propeller is just a big fan in front of the plane used to keep the pilot cool. When it stops, you can actually watch the pilot start sweating.", author: "Unknown", role: "Aviation Humor" },
+            { text: "There are old pilots and there are bold pilots. However, there are no old, bold pilots.", author: "Unknown", role: "Aviation Saying" },
+            { text: "Any landing you can walk away from is a good one.", author: "Gerald R. Ford", role: "38th US President" },
+            { text: "Lovers of air travel find it exhilarating to hang poised between the illusion of immortality and the fact of death.", author: "Alexander Chase", role: "Journalist" },
+            { text: "Every takeoff is optional. Every landing is mandatory.", author: "Unknown", role: "The Golden Rule" },
+            { text: "If you push the stick forward, the houses get bigger. If you pull the stick back, they get smaller.", author: "Unknown", role: "Flight Instructor" },
+            { text: "Flying is hours of boredom punctuated by moments of stark terror.", author: "Unknown", role: "Wartime Pilot" },
+            { text: "The quality of the box matters little. Success depends upon the man who sits in it.", author: "Manfred von Richthofen", role: "The Red Baron" },
+            { text: "It’s better to be down here wishing you were up there, than up there wishing you were down here.", author: "Unknown", role: "Pilot Wisdom" },
+            { text: "Speed is life. Altitude is life insurance.", author: "Unknown", role: "Combat Pilot" },
+            { text: "Instrument flying is an unnatural act probably punishable by God.", author: "Gordon Baxter", role: "Aviation Writer" },
+            { text: "A pilot who doesn't have any fear who hasn't been in a situation where he was afraid is not a good pilot.", author: "Unknown", role: "Aviation Philosophy" },
+            { text: "Never let an airplane take you somewhere your brain didn't go five minutes earlier.", author: "Unknown", role: "Safety Proverb" },
+            { text: "Remember, you fly an airplane with your head, not your hands and feet.", author: "Unknown", role: "Instructor Advice" },
+            { text: "Fly the airplane. It sounds simple, but it is the first thing you forget when things go wrong.", author: "Unknown", role: "Emergency Procedure" },
+            { text: "Keep the blue side up.", author: "Unknown", role: "Standard Farewell" },
+            { text: "The only time you have too much fuel is when you're on fire.", author: "Unknown", role: "Fuel Management" },
+            { text: "Learning to fly is like learning to speak a new language, but the alphabet is made of motion.", author: "Unknown", role: "Poetic Description" },
+            { text: "Pilots are a rare kind of human. They leave the ordinary surface of the word, to purify their soul in the sky.", author: "Unknown", role: "Aviation Romance" },
+            { text: "I don't think I possess any skill that anyone else doesn't have. I've just had perhaps more of an opportunity.", author: "Chuck Yeager", role: "Test Pilot" },
+            { text: "Rules are made for people who aren't willing to make up their own.", author: "Chuck Yeager", role: "Test Pilot" },
+            { text: "You can't be a test pilot and a worrywart.", author: "Chuck Yeager", role: "Test Pilot" },
+            { text: "A smooth sea never made a skilled sailor, and clear skies never made a skilled pilot.", author: "Unknown", role: "Proverb" },
+            { text: "The sky is not the limit, it's just the view.", author: "Unknown", role: "Modern Saying" },
+            { text: "Flight is the only truly new sensation that men have achieved in modern history.", author: "James Dickey", role: "Poet" },
+            { text: "He who would learn to fly one day must first learn to stand and walk and run.", author: "Friedrich Nietzsche", role: "Philosopher" },
+            { text: "I have often said that the lure of flying is the lure of beauty.", author: "Amelia Earhart", role: "Aviation Pioneer" },
+            { text: "No matter how much you fly, you never forget your first solo.", author: "Unknown", role: "Pilot Fact" },
+            { text: "A mile of highway will take you a mile. A mile of runway will take you anywhere.", author: "Unknown", role: "Inspiration" },
+            { text: "Always remember you fly an airplane with your head, not your hands.", author: "Unknown", role: "Training Advice" },
+            { text: "Don't drop the aircraft in order to fly the microphone.", author: "Unknown", role: "Avionics Rule" },
+            { text: "Truly superior pilots are those who use their superior judgment to avoid those situations where they might have to use their superior skills.", author: "Unknown", role: "Safety Creed" },
+            { text: "If God had intended man to fly, He would have given him more money.", author: "Unknown", role: "Owner Humor" },
+            { text: "Helicopters don't fly, they vibrate so bad the ground rejects them.", author: "Unknown", role: "Rotorcraft Humor" },
+            { text: "There are three simple rules for making a smooth landing. Unfortunately no one knows what they are.", author: "Unknown", role: "Landing Humor" },
+            { text: "Flying is the second greatest thrill known to man. Landing is the first.", author: "Unknown", role: "Pilot Joke" },
+            { text: "I was a pilot flying an airplane and it just so happened that where I was flying made what I was doing spying.", author: "Francis Gary Powers", role: "U-2 Pilot" },
+            { text: "Without ammunition, the USAF would be just another expensive flying club.", author: "Unknown", role: "Military Humor" },
+            { text: "Asking a pilot what he thinks of the FAA is like asking a fireplug what it thinks of dogs.", author: "Unknown", role: "Political Humor" },
+            { text: "Airspeed, altitude, and brains. Two are always needed to successfully complete the flight.", author: "Unknown", role: "Flight Wisdom" }
+            // Note: In a real database, we would have 366 items here.
+            // Logic below handles looping if this list is exhausted, ensuring the app never breaks.
+        ];
+
+        let offset = 0;
+        let isLoading = false;
+
+        // --- CORE LOGIC ---
+
+        function getDayOfYear(date) {
+            const start = new Date(date.getFullYear(), 0, 0);
+            const diff = date - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            return Math.floor(diff / oneDay);
+        }
+
+        // SEEDED RANDOM GENERATOR (LCG Algorithm)
+        // Returns a number between 0 and 1.
+        // Crucial: Same seed always = same number.
+        function seededRandomGenerator(seed) {
+            return function() {
+                seed = (seed * 1664525 + 1013904223) % 4294967296;
+                return seed / 4294967296;
+            }
+        }
+
+        // FISHER-YATES SHUFFLE
+        // Creates a randomized order of indices based on a seed (Year).
+        function getShuffledOrder(length, yearSeed) {
+            const indices = Array.from({length: length}, (_, i) => i);
+            const random = seededRandomGenerator(yearSeed);
+
+            for (let i = length - 1; i > 0; i--) {
+                const j = Math.floor(random() * (i + 1));
+                [indices[i], indices[j]] = [indices[j], indices[i]];
+            }
+            return indices;
+        }
+
+        function updateContent() {
+            if (isLoading) return; 
+            
+            const now = new Date();
+            now.setDate(now.getDate() + offset);
+            
+            const dayOfYear = getDayOfYear(now);
+            const year = now.getFullYear();
+
+            // 1. DATE DISPLAY
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('date-display').textContent = now.toLocaleDateString('en-US', options);
+
+            // 2. QUOTE SELECTION
+            // We use the shuffled order to pick a quote.
+            // If we run out of quotes (e.g. day 80 and we only have 70), we loop back to start of shuffled list.
+            const shuffledQuoteIndices = getShuffledOrder(quotes.length, year + YEAR_SEED_OFFSET_QUOTES);
+            const quoteIndex = shuffledQuoteIndices[dayOfYear % quotes.length];
+            const quote = quotes[quoteIndex];
+
+            // 3. BACKGROUND SELECTION (THE HYBRID ENGINE)
+            
+            // First, we shuffle our hand-picked high-quality images.
+            const shuffledBgIndices = getShuffledOrder(curatedBackgrounds.length, year + YEAR_SEED_OFFSET_IMAGES);
+            
+            let bgUrl;
+
+            if (dayOfYear <= curatedBackgrounds.length) {
+                // TIER 1: Use curated images for the first X days of the year
+                // Note: We use dayOfYear - 1 because array is 0-indexed
+                const index = shuffledBgIndices[(dayOfYear - 1) % curatedBackgrounds.length];
+                bgUrl = curatedBackgrounds[index];
+            } else {
+                // TIER 2: INFINITE GENERATIVE AI MODE
+                // Once we run out of curated images, we generate a unique one using a seed.
+                // Seed = (Year * 1000) + Day. This guarantees a unique image for Day 45, 2025 vs Day 45, 2026.
+                const uniqueImageSeed = (year * 1000) + dayOfYear;
+                
+                // We use a specific prompt to ensure aviation theme
+                const prompt = "cinematic aviation photography airplane in sky clouds hyperrealistic 8k wallpaper";
+                bgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?seed=${uniqueImageSeed}&width=1920&height=1080&nologo=true&enhance=true`;
+            }
+
+            // 4. UI UPDATE LOGIC (Preloading)
+            const bgImageEl = document.getElementById('bg-image');
+            const nextBtn = document.getElementById('btn-next');
+            const nextIcon = document.getElementById('next-icon-container');
+            const nextLoader = document.getElementById('next-loader');
+
+            // Handle "Future" Blocking
+            if (offset >= 0) {
+                nextBtn.disabled = true;
+                nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                nextBtn.classList.remove('hover:bg-white/5', 'hover:text-white');
+            } else {
+                nextBtn.disabled = false;
+                nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                nextBtn.classList.add('hover:bg-white/5', 'hover:text-white');
+            }
+
+            // Swap Logic
+            if (bgImageEl.src !== bgUrl) {
+                isLoading = true;
+                
+                // Show loader only if we are manually navigating
+                if (offset < 0) {
+                    nextIcon.classList.add('invisible');
+                    nextLoader.classList.remove('hidden');
+                }
+
+                const tempImg = new Image();
+                tempImg.src = bgUrl;
+                
+                tempImg.onload = () => {
+                    performSwap(quote, bgUrl);
+                    isLoading = false;
+                    nextIcon.classList.remove('invisible');
+                    nextLoader.classList.add('hidden');
+                };
+                
+                tempImg.onerror = () => {
+                    // Fallback to a curated image if AI fails
+                    bgUrl = curatedBackgrounds[0]; 
+                    performSwap(quote, bgUrl);
+                    isLoading = false;
+                    nextIcon.classList.remove('invisible');
+                    nextLoader.classList.add('hidden');
+                };
+            } else {
+                performSwap(quote, bgUrl);
+            }
+        }
+
+        function performSwap(quote, bgUrl) {
+            const elements = [
+                document.getElementById('quote-text'),
+                document.getElementById('quote-meta')
+            ];
+
+            // Fade Out Text
+            elements.forEach(el => el.style.opacity = '0');
+
+            setTimeout(() => {
+                // Update Content
+                document.getElementById('quote-text').textContent = `"${quote.text}"`;
+                document.getElementById('quote-author').textContent = quote.author;
+                document.getElementById('quote-role').textContent = quote.role;
+                
+                const bgImageEl = document.getElementById('bg-image');
+                if (bgImageEl.src !== bgUrl) {
+                    bgImageEl.src = bgUrl;
+                }
+
+                // Fade In Text
+                elements.forEach(el => el.style.opacity = '1');
+            }, 500);
+        }
+
+        function changeDay(delta) {
+            if (isLoading) return;
+            if (delta > 0 && offset >= 0) return;
+            offset += delta;
+            updateContent();
+        }
+
+        function copyQuote() {
+            const text = document.getElementById('quote-text').textContent.trim();
+            const author = document.getElementById('quote-author').textContent.trim();
+            const fullString = `${text}\n- ${author}`;
+            
+            const textArea = document.createElement("textarea");
+            textArea.value = fullString;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        // Start
+        window.onload = updateContent;
+    </script>
+</body>
+</html>
