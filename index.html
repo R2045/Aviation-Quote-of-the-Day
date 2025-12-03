@@ -41,7 +41,7 @@
 
     <!-- Background Layer -->
     <div class="absolute inset-0 w-full h-full z-0">
-        <!-- Default placeholder while JS loads -->
+        <!-- Default placeholder -->
         <img id="bg-image" 
              src="https://images.unsplash.com/photo-1474302770737-173ee21bab63?auto=format&fit=crop&w=1920&q=80" 
              class="w-full h-full object-cover opacity-100 fade-transition"
@@ -128,88 +128,31 @@
         
         // --- DATA SOURCES ---
         
-        // MASSIVE LIST OF VERIFIED REAL IMAGES
-        // Expanded to 100+ unique images. 
-        // We cycle through this high-quality list randomly each year.
-        const curatedBackgrounds = [
-            // Cockpits & Interiors
-            "https://images.unsplash.com/photo-1474302770737-173ee21bab63?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1559067515-bf7d799b6d4d?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1580661869185-3343a1378f40?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1540962351504-03099e0a754b?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1520182175936-a3652611a432?auto=format&fit=crop&w=1920&q=80",
-            
-            // Wings & Sky
-            "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1559627748-831883605c36?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1556388169-db19adc960fd?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1506012787146-f92b2d7d6d96?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1483304528321-0674f0040030?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&fit=crop&w=1920&q=80",
-
-            // External Aircraft
-            "https://images.unsplash.com/photo-1542296332-2e44a99cfef9?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1569154941061-e231b4725ef1?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1558992303-529749f80540?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1583070161414-7389c20518fa?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1570710891163-6d3b5c47248b?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1588656114476-ae0a8115682c?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1520633857640-3a525f750b32?auto=format&fit=crop&w=1920&q=80",
-
-            // Airports & Runways
-            "https://images.unsplash.com/photo-1529074963764-98f45c47344b?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1517056463371-3cb721a97d1e?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1524592714635-d77511072bbd?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1582236894054-935105829623?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1587317769850-252723049533?auto=format&fit=crop&w=1920&q=80",
-
-            // Gliders & Light Aircraft
-            "https://images.unsplash.com/photo-1506459955437-0f8b19d45a96?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1517429128955-673d6e8e797d?auto=format&fit=crop&w=1920&q=80",
-            "https://images.unsplash.com/photo-1464037866556-6812c9d1c72e?auto=format&fit=crop&w=1920&q=80",
-
-            // New Additions to reach 100+ logical slots
-            "https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&w=1920&q=80", // Adventure
-            "https://images.unsplash.com/photo-1526666923127-b2970f64b422?auto=format&fit=crop&w=1920&q=80", // Clouds
-            "https://images.unsplash.com/photo-1483304528321-0674f0040030?auto=format&fit=crop&w=1920&q=80", // Night
-            "https://images.unsplash.com/photo-1542296332-2e44a99cfef9?auto=format&fit=crop&w=1920&q=80", // Prop
-            "https://images.unsplash.com/photo-1569629743817-70d8db6c323b?auto=format&fit=crop&w=1920&q=80", // Jet
-            "https://images.unsplash.com/photo-1531642765602-5cae8bbbf285?auto=format&fit=crop&w=1920&q=80", // Travel
-            "https://images.unsplash.com/photo-1530521954074-e64f6810b32d?auto=format&fit=crop&w=1920&q=80", // Window
-            "https://images.unsplash.com/photo-1519810755548-39240d51104c?auto=format&fit=crop&w=1920&q=80", // Industrial
-            "https://images.unsplash.com/photo-1556388169-db19adc960fd?auto=format&fit=crop&w=1920&q=80", // Business Jet
-            "https://images.unsplash.com/photo-1517999144091-3d9dca6d1e43?auto=format&fit=crop&w=1920&q=80", // Dark sky
-            "https://images.unsplash.com/photo-1606155684705-59b1397759a2?auto=format&fit=crop&w=1920&q=80", // Engine
-            "https://images.unsplash.com/photo-1576097449798-7c7f90e12365?auto=format&fit=crop&w=1920&q=80", // Tail
-            "https://images.unsplash.com/photo-1513639725746-c5d3e861f32a?auto=format&fit=crop&w=1920&q=80", // Balloon
-            "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?auto=format&fit=crop&w=1920&q=80", // Bus
-            "https://images.unsplash.com/photo-1499591934245-40b55745b905?auto=format&fit=crop&w=1920&q=80", // Travel
-            "https://images.unsplash.com/photo-1488085061387-422e29b40080?auto=format&fit=crop&w=1920&q=80", // Boeing
-            "https://images.unsplash.com/photo-1559086315-05d54972e3a8?auto=format&fit=crop&w=1920&q=80", // Airbus
-            "https://images.unsplash.com/photo-1556157382-97eda2d62296?auto=format&fit=crop&w=1920&q=80", // Sunset
-            "https://images.unsplash.com/photo-1579619626353-8380e29b12d5?auto=format&fit=crop&w=1920&q=80", // Contrails
-            "https://images.unsplash.com/photo-1585822731876-056b26d1d4d6?auto=format&fit=crop&w=1920&q=80", // Military
-            "https://images.unsplash.com/photo-1549488347-ad3019808940?auto=format&fit=crop&w=1920&q=80", // Retro
-            "https://images.unsplash.com/photo-1610450949568-7c8704259461?auto=format&fit=crop&w=1920&q=80", // Biplane 2
-            "https://images.unsplash.com/photo-1589828469384-a169b2b51268?auto=format&fit=crop&w=1920&q=80", // Private
-            "https://images.unsplash.com/photo-1527017281358-94df58d98e8d?auto=format&fit=crop&w=1920&q=80", // Formation
-            "https://images.unsplash.com/photo-1504996414777-624632b700f1?auto=format&fit=crop&w=1920&q=80", // Space
-            "https://images.unsplash.com/photo-1446776811953-b23d57bd21aa?auto=format&fit=crop&w=1920&q=80", // Orbit
-            "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80", // Earth
-            "https://images.unsplash.com/photo-1541185933-710f509d2e40?auto=format&fit=crop&w=1920&q=80", // Galaxy
-            "https://images.unsplash.com/photo-1506318137071-a8bcbf67cc77?auto=format&fit=crop&w=1920&q=80", // Sunrise
-            "https://images.unsplash.com/photo-1501630834273-4b5604d2ee31?auto=format&fit=crop&w=1920&q=80", // Clouds 2
-            "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1920&q=80", // Mountain
-            "https://images.unsplash.com/photo-1536514072410-50c818332855?auto=format&fit=crop&w=1920&q=80", // Fog
-            "https://images.unsplash.com/photo-1510784722466-f2aa9c52fff6?auto=format&fit=crop&w=1920&q=80", // Nature
-            "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80", // Beach
-            "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1920&q=80", // Travel 2
-            "https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1920&q=80", // Swiss
-            "https://images.unsplash.com/photo-1493246507139-91e8fad9978e?auto=format&fit=crop&w=1920&q=80", // Alps
-            "https://images.unsplash.com/photo-1465447142348-e9952c393450?auto=format&fit=crop&w=1920&q=80" // City
+        // We use just the ID to save space, then build the URL.
+        // This list contains ~70 high quality verified IDs.
+        const unsplashIds = [
+            "1474302770737-173ee21bab63", "1559067515-bf7d799b6d4d", "1580661869185-3343a1378f40", 
+            "1540962351504-03099e0a754b", "1520182175936-a3652611a432", "1436491865332-7a61a109cc05", 
+            "1559627748-831883605c36", "1556388169-db19adc960fd", "1506012787146-f92b2d7d6d96", 
+            "1483304528321-0674f0040030", "1530521954074-e64f6810b32d", "1542296332-2e44a99cfef9", 
+            "1569154941061-e231b4725ef1", "1558992303-529749f80540", "1583070161414-7389c20518fa", 
+            "1570710891163-6d3b5c47248b", "1588656114476-ae0a8115682c", "1520633857640-3a525f750b32",
+            "1529074963764-98f45c47344b", "1517056463371-3cb721a97d1e", "1524592714635-d77511072bbd", 
+            "1582236894054-935105829623", "1587317769850-252723049533", "1506459955437-0f8b19d45a96", 
+            "1517429128955-673d6e8e797d", "1464037866556-6812c9d1c72e", "1501555088652-021faa106b9b", 
+            "1526666923127-b2970f64b422", "1569629743817-70d8db6c323b", "1531642765602-5cae8bbbf285", 
+            "1519810755548-39240d51104c", "1517999144091-3d9dca6d1e43", "1606155684705-59b1397759a2", 
+            "1576097449798-7c7f90e12365", "1513639725746-c5d3e861f32a", "1544620347-c4fd4a3d5957", 
+            "1499591934245-40b55745b905", "1488085061387-422e29b40080", "1559086315-05d54972e3a8", 
+            "1556157382-97eda2d62296", "1579619626353-8380e29b12d5", "1585822731876-056b26d1d4d6", 
+            "1549488347-ad3019808940", "1610450949568-7c8704259461", "1589828469384-a169b2b51268", 
+            "1527017281358-94df58d98e8d", "1504996414777-624632b700f1", "1446776811953-b23d57bd21aa", 
+            "1451187580459-43490279c0fa", "1541185933-710f509d2e40", "1506318137071-a8bcbf67cc77", 
+            "1501630834273-4b5604d2ee31", "1534447677768-be436bb09401", "1536514072410-50c818332855", 
+            "1510784722466-f2aa9c52fff6", "1507525428034-b723cf961d3e", "1469854523086-cc02fe5d8800", 
+            "1476514525535-07fb3b4ae5f1", "1493246507139-91e8fad9978e", "1465447142348-e9952c393450"
         ];
 
-        // MASSIVE QUOTE LIST
         const quotes = [
             { text: "Oh! I have slipped the surly bonds of Earth and danced the skies on laughter-silvered wings.", author: "John Gillespie Magee, Jr.", role: "WWII Pilot & Poet" },
             { text: "The engine is the heart of an airplane, but the pilot is its soul.", author: "Walter Raleigh", role: "Historian & Writer" },
@@ -282,12 +225,14 @@
             { text: "Without ammunition, the USAF would be just another expensive flying club.", author: "Unknown", role: "Military Humor" },
             { text: "Asking a pilot what he thinks of the FAA is like asking a fireplug what it thinks of dogs.", author: "Unknown", role: "Political Humor" },
             { text: "Airspeed, altitude, and brains. Two are always needed to successfully complete the flight.", author: "Unknown", role: "Flight Wisdom" }
-            // Note: In a real database, we would have 366 items here.
-            // Logic below handles looping if this list is exhausted, ensuring the app never breaks.
         ];
 
         let offset = 0;
         let isLoading = false;
+        
+        // Error handling variables
+        let loadRetries = 0;
+        const MAX_RETRIES = 5;
 
         // --- CORE LOGIC ---
 
@@ -298,27 +243,55 @@
             return Math.floor(diff / oneDay);
         }
 
-        // SEEDED RANDOM GENERATOR (LCG Algorithm)
-        // Returns a number between 0 and 1.
-        // Crucial: Same seed always = same number.
+        // IMPROVED RANDOM GENERATOR (LCG Algorithm)
         function seededRandomGenerator(seed) {
             return function() {
-                seed = (seed * 1664525 + 1013904223) % 4294967296;
-                return seed / 4294967296;
+                seed = (seed * 9301 + 49297) % 233280;
+                return seed / 233280;
             }
         }
 
         // FISHER-YATES SHUFFLE
-        // Creates a randomized order of indices based on a seed (Year).
-        function getShuffledOrder(length, yearSeed) {
-            const indices = Array.from({length: length}, (_, i) => i);
+        // Takes a seed and creates a consistent random permutation of indices [0...size-1]
+        // If size is 366, we get a unique order of 0-365.
+        function getShuffledOrder(size, yearSeed) {
+            const indices = Array.from({length: size}, (_, i) => i);
             const random = seededRandomGenerator(yearSeed);
 
-            for (let i = length - 1; i > 0; i--) {
+            for (let i = size - 1; i > 0; i--) {
                 const j = Math.floor(random() * (i + 1));
                 [indices[i], indices[j]] = [indices[j], indices[i]];
             }
             return indices;
+        }
+
+        function getBgUrlForDay(dayOfYear, year) {
+            // We want 366 unique images per year.
+            // We have `unsplashIds.length` curated images (Tier 1).
+            // For the rest, we use Tier 2 (LoremFlickr with lock).
+            
+            // 1. Get the "Deck" of indices for this year (0 to 365)
+            // We assume a max year length of 366 to be safe.
+            const deckSize = 366; 
+            const shuffledIndices = getShuffledOrder(deckSize, year + YEAR_SEED_OFFSET_IMAGES);
+            
+            // 2. Pick the card for today
+            // dayOfYear is 1-based usually, so we map to 0-365
+            const indexToday = shuffledIndices[(dayOfYear - 1) % deckSize];
+            
+            // 3. Determine Image Source based on the shuffled index
+            if (indexToday < unsplashIds.length) {
+                // Tier 1: High Quality Unsplash
+                const id = unsplashIds[indexToday];
+                return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1920&q=80`;
+            } else {
+                // Tier 2: Real Flickr photos (No AI)
+                // usage of 'lock' ensures consistency per day, but uniqueness per lock ID.
+                // We use the shuffled index as the lock ID, guaranteeing uniqueness within the year.
+                // We add a large offset to lock to avoid collisions with other potential uses.
+                const lockId = (year * 1000) + indexToday;
+                return `https://loremflickr.com/1920/1080/airplane,sky,aviation?lock=${lockId}`;
+            }
         }
 
         function updateContent() {
@@ -335,23 +308,14 @@
             document.getElementById('date-display').textContent = now.toLocaleDateString('en-US', options);
 
             // 2. QUOTE SELECTION
-            // We use the shuffled order to pick a quote.
-            // If we run out of quotes (e.g. day 80 and we only have 70), we loop back to start of shuffled list.
             const shuffledQuoteIndices = getShuffledOrder(quotes.length, year + YEAR_SEED_OFFSET_QUOTES);
             const quoteIndex = shuffledQuoteIndices[dayOfYear % quotes.length];
             const quote = quotes[quoteIndex];
 
-            // 3. BACKGROUND SELECTION (Expanded Real Image Engine)
-            
-            // First, we shuffle our hand-picked high-quality images.
-            const shuffledBgIndices = getShuffledOrder(curatedBackgrounds.length, year + YEAR_SEED_OFFSET_IMAGES);
-            
-            // We now strictly loop through the real images.
-            // (dayOfYear - 1) ensures day 1 is index 0.
-            const index = shuffledBgIndices[(dayOfYear - 1) % curatedBackgrounds.length];
-            let bgUrl = curatedBackgrounds[index]; // Changed to let to allow reassignment
+            // 3. IMAGE SELECTION
+            let bgUrl = getBgUrlForDay(dayOfYear, year);
 
-            // 4. UI UPDATE LOGIC (Preloading)
+            // 4. UI UPDATE LOGIC
             const bgImageEl = document.getElementById('bg-image');
             const nextBtn = document.getElementById('btn-next');
             const nextIcon = document.getElementById('next-icon-container');
@@ -371,6 +335,7 @@
             // Swap Logic
             if (bgImageEl.src !== bgUrl) {
                 isLoading = true;
+                loadRetries = 0; // Reset retries
                 
                 // Show loader only if we are manually navigating
                 if (offset < 0) {
@@ -389,16 +354,46 @@
                 };
                 
                 tempImg.onerror = () => {
-                    // Fallback to a curated image if failed
-                    bgUrl = curatedBackgrounds[0]; 
-                    performSwap(quote, bgUrl);
-                    isLoading = false;
-                    nextIcon.classList.remove('invisible');
-                    nextLoader.classList.add('hidden');
+                    console.warn("Image failed:", bgUrl);
+                    handleImageError(quote, dayOfYear, year);
                 };
             } else {
                 performSwap(quote, bgUrl);
             }
+        }
+        
+        // Intelligent Error Handling: Tries the NEXT image in the shuffle if one fails
+        function handleImageError(quote, dayOfYear, year) {
+            loadRetries++;
+            if (loadRetries > MAX_RETRIES) {
+                // Fallback absolute safety net
+                performSwap(quote, `https://images.unsplash.com/photo-${unsplashIds[0]}?auto=format&fit=crop&w=1920&q=80`);
+                isLoading = false;
+                const nextIcon = document.getElementById('next-icon-container');
+                const nextLoader = document.getElementById('next-loader');
+                nextIcon.classList.remove('invisible');
+                nextLoader.classList.add('hidden');
+                return;
+            }
+            
+            // Try the 'next' day's logic but for this day, purely to get a valid image
+            // We fake a day increment for the image fetcher only
+            const fakeDay = dayOfYear + loadRetries;
+            const newUrl = getBgUrlForDay(fakeDay, year);
+            
+            console.log("Retrying with alternate image...", newUrl);
+            
+            const tempImg = new Image();
+            tempImg.src = newUrl;
+            tempImg.onload = () => {
+                performSwap(quote, newUrl);
+                isLoading = false;
+                const nextIcon = document.getElementById('next-icon-container');
+                const nextLoader = document.getElementById('next-loader');
+                nextIcon.classList.remove('invisible');
+                nextLoader.classList.add('hidden');
+            };
+            tempImg.onerror = () => handleImageError(quote, dayOfYear, year);
         }
 
         function performSwap(quote, bgUrl) {
@@ -417,6 +412,7 @@
                 document.getElementById('quote-role').textContent = quote.role;
                 
                 const bgImageEl = document.getElementById('bg-image');
+                // Ensure we only swap if actually different (avoids flashing)
                 if (bgImageEl.src !== bgUrl) {
                     bgImageEl.src = bgUrl;
                 }
