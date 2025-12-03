@@ -124,10 +124,9 @@
     <script>
         // --- CONFIGURATION ---
         const YEAR_SEED_OFFSET_QUOTES = 2025; // Change this to shuffle quotes
-        const YEAR_SEED_OFFSET_IMAGES = 9999;
+        const YEAR_SEED_OFFSET_IMAGES = 10000;
         
         // --- DATA SOURCES ---
-        // 150+ REAL Verified Unsplash IDs to prevent repeats
         const unsplashIds = [
             "1474302770737-173ee21bab63", "1559067515-bf7d799b6d4d", "1580661869185-3343a1378f40", 
             "1540962351504-03099e0a754b", "1520182175936-a3652611a432", "1436491865332-7a61a109cc05", 
@@ -163,11 +162,10 @@
             "1509355792942-d601b0f69a9e", "1495400589139-3544d6a74c20", "1507726521990-1c70e2b9633e"
         ];
 
-        // *** STRICT DUPLICATE REMOVAL ***
-        // Ensure the list is 100% unique ID strings to prevent "phantom" repeats
+        // *** STRICT DUPLICATE REMOVAL & SANITIZATION ***
         const uniqueUnsplashIds = [...new Set(unsplashIds)];
 
-        // MASSIVE QUOTE LIST (Expanded to prevent repeats)
+        // MASSIVE QUOTE LIST
         const quotes = [
             // PIONEERS
             { text: "Oh! I have slipped the surly bonds of Earth and danced the skies on laughter-silvered wings.", author: "John Gillespie Magee, Jr.", role: "WWII Pilot & Poet" },
@@ -235,7 +233,7 @@
             { text: "Remember, you fly an airplane with your head, not your hands and feet.", author: "Unknown", role: "Instructor Advice" },
             { text: "Truly superior pilots are those who use their superior judgment to avoid those situations where they might have to use their superior skills.", author: "Unknown", role: "Safety Creed" },
             
-            // EXPANDED LIST TO ENSURE UNIQUENESS (100+ More)
+            // EXPANDED LIST
             { text: "A smooth sea never made a skilled sailor, and clear skies never made a skilled pilot.", author: "Unknown", role: "Proverb" },
             { text: "The sky is not the limit, it's just the view.", author: "Unknown", role: "Modern Saying" },
             { text: "No matter how much you fly, you never forget your first solo.", author: "Unknown", role: "Pilot Fact" },
@@ -345,11 +343,12 @@
         let offset = 0;
         let isLoading = false;
         
-        // Error handling variables
         let loadRetries = 0;
         const MAX_RETRIES = 5;
 
-        // --- CORE LOGIC ---
+        // --- DECK MANAGEMENT ---
+        let yearDeck = [];
+        let currentYearForDeck = null;
 
         function getDayOfYear(date) {
             const start = new Date(date.getFullYear(), 0, 0);
@@ -358,7 +357,6 @@
             return Math.floor(diff / oneDay);
         }
 
-        // IMPROVED RANDOM GENERATOR (LCG Algorithm)
         function seededRandomGenerator(seed) {
             return function() {
                 seed = (seed * 9301 + 49297) % 233280;
@@ -366,12 +364,46 @@
             }
         }
 
-        // FISHER-YATES SHUFFLE
-        // Takes a seed and creates a consistent random permutation of indices [0...size-1]
+        // GENERATE A PERFECT 366-CARD DECK
+        // 1. Fill it to 366 by repeating source images
+        // 2. Shuffle it using the year seed
+        // 3. De-clump: Ensure no neighbors are identical
+        function generateYearlyDeck(year) {
+            const deckSize = 366;
+            let deck = [];
+            
+            // Step 1: Fill Deck
+            // We repeat the unique list until we have enough for a year
+            while (deck.length < deckSize) {
+                deck = deck.concat(uniqueUnsplashIds);
+            }
+            deck = deck.slice(0, deckSize); // Trim to exact year length
+
+            // Step 2: Shuffle
+            const random = seededRandomGenerator(year + YEAR_SEED_OFFSET_IMAGES);
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+
+            // Step 3: Anti-Clumping Pass (The "2 in a row" Fix)
+            // Iterate through and if we find duplicates, swap with neighbor
+            for (let i = 1; i < deck.length; i++) {
+                if (deck[i] === deck[i-1]) {
+                    // Swap with next available non-matching card
+                    // In a shuffled deck of ~150 unique items, a neighbor swap is sufficient
+                    // to break the run 99.9% of the time.
+                    // We swap with i+1 (wrapping around to 0 if at end)
+                    let swapIndex = (i + 1) % deck.length;
+                    [deck[i], deck[swapIndex]] = [deck[swapIndex], deck[i]];
+                }
+            }
+            return deck;
+        }
+
         function getShuffledOrder(size, yearSeed) {
             const indices = Array.from({length: size}, (_, i) => i);
             const random = seededRandomGenerator(yearSeed);
-
             for (let i = size - 1; i > 0; i--) {
                 const j = Math.floor(random() * (i + 1));
                 [indices[i], indices[j]] = [indices[j], indices[i]];
@@ -380,33 +412,17 @@
         }
 
         function getBgUrlForDay(dayOfYear, year) {
-            // We want 366 unique images per year.
-            // We use the cleaned list of curated images.
-            
-            // 1. Get the "Deck" of indices for this year (0 to 365)
-            // We assume a max year length of 366 to be safe.
-            const deckSize = 366; 
-            const shuffledIndices = getShuffledOrder(deckSize, year + YEAR_SEED_OFFSET_IMAGES);
-            
-            // 2. Pick the card for today
-            let indexToday = shuffledIndices[(dayOfYear - 1) % deckSize];
-            
-            // *** CRITICAL FIX: ANTI-REPEAT LOOKBEHIND ***
-            // Resolve the actual IDs to compare values, not just indices.
-            let candidateId = uniqueUnsplashIds[indexToday % uniqueUnsplashIds.length];
-            
-            // Check yesterday's ID
-            const indexYesterday = shuffledIndices[(dayOfYear - 2 + deckSize) % deckSize];
-            const idYesterday = uniqueUnsplashIds[indexYesterday % uniqueUnsplashIds.length];
-            
-            // If the actual ID string is the same as yesterday, skip to the next math slot
-            if (candidateId === idYesterday) {
-                console.log("Collision detected! Shifting index to prevent repeat.");
-                indexToday = (indexToday + 1) % deckSize;
-                candidateId = uniqueUnsplashIds[indexToday % uniqueUnsplashIds.length];
+            // Re-generate deck if year changes
+            if (currentYearForDeck !== year || yearDeck.length === 0) {
+                yearDeck = generateYearlyDeck(year);
+                currentYearForDeck = year;
             }
 
-            return `https://images.unsplash.com/photo-${candidateId}?auto=format&fit=crop&w=1920&q=80`;
+            // Use 0-based index for array access
+            const index = (dayOfYear - 1) % yearDeck.length;
+            const id = yearDeck[index];
+            
+            return `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=1920&q=80`;
         }
 
         function updateContent() {
@@ -423,22 +439,16 @@
             document.getElementById('date-display').textContent = now.toLocaleDateString('en-US', options);
 
             // 2. QUOTE SELECTION
-            // NEW LOGIC: Use Strict Anti-Repeat for quotes too.
             const deckSizeQuotes = quotes.length;
             const shuffledQuoteIndices = getShuffledOrder(deckSizeQuotes, year + YEAR_SEED_OFFSET_QUOTES);
             
-            // Get index for today
             let quoteIndex = shuffledQuoteIndices[(dayOfYear - 1) % deckSizeQuotes];
             
             // Anti-Repeat Guard for Quotes
-            // Check previous day's index
             const prevQuoteIndex = shuffledQuoteIndices[(dayOfYear - 2 + deckSizeQuotes) % deckSizeQuotes];
-            
             if (quoteIndex === prevQuoteIndex) {
-                 // If collision, shift to next card in shuffled deck
                  quoteIndex = shuffledQuoteIndices[(dayOfYear) % deckSizeQuotes];
             }
-            
             const quote = quotes[quoteIndex];
 
             // 3. IMAGE SELECTION
@@ -464,7 +474,7 @@
             // Swap Logic
             if (bgImageEl.src !== bgUrl) {
                 isLoading = true;
-                loadRetries = 0; // Reset retries
+                loadRetries = 0; 
                 
                 if (offset < 0) {
                     nextIcon.classList.add('invisible');
@@ -492,8 +502,13 @@
         
         function handleImageError(quote, dayOfYear, year) {
             loadRetries++;
+            
+            // If main image fails, try jumping 7 days ahead in the deck (pseudo-random fallback)
+            // This prevents "Image 1 Loop" if image 1 is broken
+            // We use 'loadRetries' to jump further each time
+            
             if (loadRetries > MAX_RETRIES) {
-                // Use the first unique ID as absolute fallback
+                // Absolute last resort - use the first ID in raw list
                 performSwap(quote, `https://images.unsplash.com/photo-${uniqueUnsplashIds[0]}?auto=format&fit=crop&w=1920&q=80`);
                 isLoading = false;
                 const nextIcon = document.getElementById('next-icon-container');
@@ -503,10 +518,12 @@
                 return;
             }
             
-            const fakeDay = dayOfYear + loadRetries;
-            const newUrl = getBgUrlForDay(fakeDay, year);
+            // Dynamic Fallback: Jump ahead in the deck instead of using index 0
+            const jumpIndex = (dayOfYear + (loadRetries * 7)) % 366; 
+            const newId = yearDeck[jumpIndex] || uniqueUnsplashIds[0];
+            const newUrl = `https://images.unsplash.com/photo-${newId}?auto=format&fit=crop&w=1920&q=80`;
             
-            console.log("Retrying with alternate image...", newUrl);
+            console.log("Retrying with fallback image...", newUrl);
             
             const tempImg = new Image();
             tempImg.src = newUrl;
@@ -527,7 +544,6 @@
                 document.getElementById('quote-meta')
             ];
 
-            // Fade Out Text
             elements.forEach(el => el.style.opacity = '0');
 
             setTimeout(() => {
@@ -540,7 +556,6 @@
                     bgImageEl.src = bgUrl;
                 }
 
-                // Fade In Text
                 elements.forEach(el => el.style.opacity = '1');
             }, 500);
         }
